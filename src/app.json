@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/login/main",
+    "pages/index/main",
+    "pages/player/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "WeChat",
+    "navigationBarTextStyle": "black"
+  }
+}
