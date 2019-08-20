@@ -1,299 +1,309 @@
 <template>
   <div class="body_page">
-    <!-- 列表筛选部分 -->
-    <div class='list_title'>
-      <!-- 默认 -->
-      <div @click='defaultSort' class='list_title_screen'>
-        <p :style="{opacity:(default_state?'0.5':'1')}">默认</p>
-        <!-- 未选中 -->
-        <img class='show_icon' src='../../../static/images/present_0@3x.png' v-if="default_state">
-        <!-- 已选中 -->
-        <img class='hide_icon' src='../../../static/images/present_1@3x.png' v-else>
-      </div>
-      <!-- 更新 -->
-      <div @click='updateSort' class='list_title_screen'>
-        <p :style="{opacity:(update_state?'0.5':'1')}">更新</p>
-        <!-- 未选中 -->
-        <img class='show_icon' src='../../../static/images/present_0@3x.png' v-if="update_state">
-        <!-- 已选中 -->
-        <img class='hide_icon' src='../../../static/images/present_1@3x.png' v-else>
-      </div>
-      <!-- 观看 -->
-      <div @click='viewSort' class='list_title_screen'>
-        <p :style="{opacity:(view_state?'0.5':'1')}">观看</p>
-        <!-- 未选中 -->
-        <img class='show_icon' src='../../../static/images/present_0@3x.png' v-if="view_state">
-        <!-- 已选中 -->
-        <img class='hide_icon' src='../../../static/images/present_1@3x.png' v-else>
-      </div>
-      <!-- 点赞 -->
-      <div @click='likesSort' class='list_title_screen'>
-        <p :style="{opacity:(like_state?'0.5':'1')}">默认</p>
-        <!-- 未选中 -->
-        <img class='show_icon' src='../../../static/images/present_0@3x.png' v-if="like_state">
-        <!-- 已选中 -->
-        <img class='hide_icon' src='../../../static/images/present_1@3x.png' v-else>
+    <!--添加部分-->
+    <div class="add_box">
+      <div class="add_video" @click="VideoBegins">
+        <img src="../../../static/images/add_video.png">
+        <p>做影集</p>
       </div>
     </div>
-    <!-- 列表内容部分 -->
-    <div class="list_box">
-      <div class="list_box_details" v-for="item in Data_Arr" wx:key="index" @click="jumpPlay"
-           :data-microId="item.microId">
-        <div class="list_box_details_img">
-          <img :src="item.screensHotUrl"/>
-        </div>
-        <div class="list_box_details_desc">
-          <div class="desc">
-            <p class="desc_title">{{item.name}}</p>
-            <p class="desc_info">
-              <span v-if="item.updateStatus === 0">更新至{{item.setNum}}集</span>
-              <span v-else>已完结</span></p>
-          </div>
-          <div class="list_box_details_operator">
-            <div class="operator_look"><img src="../../../static/images/watch@3x.png"/>{{item.playCount}}</div>
-            <div class="operator_like"><img src="../../../static/images/like@3x.png"/>{{item.likeCount}}</div>
-          </div>
-        </div>
+    <!--模板部分-->
+    <div class="board_box">
+      <div class="board_title">
+        <h1>推荐模板</h1>
+        <p>更多</p>
       </div>
+      <div class="board_content">
+        这里是模板详情部分
+      </div>
+    </div>
+    <!--小工具部分-->
+    <div class="books_box">
+      <div class="books_title">
+        <h1>小工具</h1>
+      </div>
+      <div class="books_content">
+        这里是工具部分
+      </div>
+    </div>
+    <!--弹窗部分-->
+    <div class="pop_up_window" :class="popData" @click="cancel">
+      <div class="pop_uo_box">
+        <div class="upload_photo" @click="uploadPhoto">
+          <div><img src="../../../static/images/add_video.png"></div>
+          <div>
+            <h1>上传照片</h1>
+            <p>从手机上传新照片（最多100张）</p>
+          </div>
+        </div>
+        <div class="upload_video" @click="uploadVideo">
+          <div><img src="../../../static/images/add_video.png"></div>
+          <div>
+            <h1>上传视频</h1>
+            <p>从手机上传新照片（最多100张）</p>
+          </div>
+        </div>
+        <div class="already_uoload" @click="alreadyUpload">
+          <div><img src="../../../static/images/add_video.png"></div>
+          <div>
+            <h1>已上传</h1>
+            <p>从手机上传新照片（最多100张）</p>
+          </div>
+        </div>
+        <div class="cancel" @click="cancel">取消</div>
+      </div>
+
     </div>
   </div>
 </template>
 <script>
-  import {get} from '@/utils/http.js'
-
   export default {
     data () {
       return {
-        default_state: false,
-        update_state: true,
-        view_state: true,
-        like_state: true,
-        Data_Arr: []
+        popData: 'popDataN'
       }
     },
     created () {
-      // 函数执行 默认排序-请求接口--微剧列表（GET）
-      this.getCategory(1, 0, 40)
     },
     mounted () {
 
     },
     methods: {
-      // 函数定义 请求接口--GET
-      async getCategory (sortType, startId, pageSize) {
-        let header = {
-          'content-type': 'application/json' // 默认值
-        }
-        // 封装参数集合
-        let params = {
-          sortType: sortType,
-          startId: startId,
-          pageSize: pageSize
-        }
-        const newparams = Object.assign(params)
-        // 开始执行封装的请求
-        const data = await get('/microvision/getMicrovisionListForSquare', newparams, header)
-        // 打印出返回的数据
-        let resData = data.data
-        let DataArr = []
-        for (let i in resData) {
-          let playCountState = resData[i].playCount
-          let likeCountState = resData[i].likeCount
-          let playCount = this.calculate(playCountState)
-          let likeCount = this.calculate(likeCountState)
-          let temp = {
-            name: resData[i].name,
-            screensHotUrl: resData[i].screensHotUrl,
-            updateStatus: resData[i].updateStatus,
-            setNum: resData[i].setNum,
-            playCount: playCount,
-            likeCount: likeCount,
-            microId: resData[i].id
+      // 显示上传按钮弹窗
+      VideoBegins: function () {
+        this.popData = 'popDataY'
+      },
+      cancel: function () {
+        this.popData = 'popDataN'
+      },
+      // 上传照片
+      uploadPhoto () {
+        wx.chooseImage({
+          count: 9, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success (res) {
+            // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+            this.setData({
+              src: res.tempFilePaths[0],
+              srcChanged: true
+            })
           }
-          DataArr.push(temp)
-        }
-        this.Data_Arr = DataArr
+        })
       },
-      // 函数定义 默认排序
-      defaultSort () {
-        this.default_state = false
-        this.update_state = true
-        this.view_state = true
-        this.like_state = true
-        // 函数执行 默认排序-请求接口--微剧列表（GET）
-        this.getCategory(1, 0, 40)
+      // 上传视频
+      uploadVideo () {
+        wx.chooseVideo({
+          sourceType: ['album', 'camera'],
+          maxDuration: 60,
+          camera: 'back',
+          success (res) {
+            console.log(res.tempFilePath)
+          }
+        })
       },
-      // 函数定义 更新排序
-      updateSort () {
-        this.default_state = true
-        this.update_state = false
-        this.view_state = true
-        this.like_state = true
-        // 函数执行 更新排序-请求接口--微剧列表（GET）
-        this.getCategory(2, 0, 40)
-      },
-      // 函数定义 观看排序
-      viewSort () {
-        this.default_state = true
-        this.update_state = true
-        this.view_state = false
-        this.like_state = true
-        // 函数执行 观看-请求接口--微剧列表（GET）
-        this.getCategory(3, 0, 40)
-      },
-      // 函数定义 喜欢排序
-      likesSort () {
-        this.default_state = true
-        this.update_state = true
-        this.view_state = true
-        this.like_state = false
-        // 函数执行 点赞排序-请求接口--微剧列表（GET）
-        this.getCategory(4, 0, 40)
-      },
-      // 函数定义 如果到“万”则换算
-      calculate (res) {
-        if (res > 9999) {
-          res = (res / 10000).toFixed(0) + 'W'
-        }
-        return res
-      },
-      // 函数定义 跳转到播放页
-      jumpPlay (e) {
-        let microid = e.currentTarget.dataset.microid
-        const url = '../player/main?microid=' + microid
-        wx.navigateTo({url})
+      // 已经上传
+      alreadyUpload () {
+
       }
     }
   }
 </script>
 
 <style scoped>
-  /*全局背景色*/
+  /*全局样式*/
   .body_page {
-    background: #000000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2px 5px;
   }
 
-  /* H1 列表筛选部分 */
-  .list_title {
+  /*添加部分样式*/
+  .add_box {
+    background: #f0f0f0;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+  }
+
+  .add_video {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 30px;
+  }
+
+  .add_video img {
+    width: 30px;
+    height: 30px;
+  }
+
+  /*模板部分*/
+  .board_box {
+    width: 100%;
+    padding: 10px 0px;
+  }
+
+  .board_title {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    position: fixed;
-    top: 0px;
-    width: 100%;
-  }
-
-  /* 列表筛选小板块内容 */
-  .list_title_screen {
-    width: 24.8%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     align-items: center;
-    padding: 10px 0px;
-    background: #121212
   }
 
-  /* 列表小版块图标 */
-  .list_title_screen image {
-    width: 5px;
-    height: 11px;
-    opacity: 1;
-    margin-left: 5px;
-  }
-
-  /*列表小版块文字*/
-  .list_title_screen p {
-    width: 26px;
-    height: 18px;
-    opacity: 1;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 1);
-    line-height: 18px;
-    letter-spacing: 0px;
-  }
-
-  /*列表内容部分*/
-  .list_box {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    color: #ffffff;
-    width: 100%;
-    padding-top: 37px;
-  }
-
-  /*列表详情模块*/
-  .list_box_details {
-    width: 48%;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    margin-left: 1.5%;
-    margin-bottom: 0.5%;
-  }
-
-  /*列表详情头图*/
-  .list_box_details_img img {
-    width: 180px;
-    height: 240px;
-  }
-
-  /*列表详情数据*/
-  .list_box_details_desc {
-  }
-
-  /*列表描述数据*/
-  .desc {
-  }
-
-  /*列表描述数据标题*/
-  .desc_title {
-    opacity: 1;
+  .board_title h1 {
     font-size: 16px;
-    line-height: 22px;
-    letter-spacing: 0px;
+    font-weight: bold;
   }
 
-  /*列表描述数据更新进度*/
-  .desc_info {
-    opacity: 0.5;
-    font-size: 12px;
-    line-height: 17px;
-    letter-spacing: 0px;
+  .board_title p {
+    font-size: 14px;
+    color: #9d9d9d;
   }
 
-  /*  列表交互数据*/
-  .list_box_details_operator {
+  /*小工具部分*/
+  .books_box {
+    width: 100%;
+    padding: 10px 0px;
+  }
+
+  .books_title {
     display: flex;
     flex-direction: row;
-    opacity: 1;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .books_box h1 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  /*弹窗部分*/
+  .pop_up_window {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    opacity: 0.7;
+    background-color: black;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .pop_uo_box {
+    position: fixed;
+    width: 100%;
+    bottom: 0%;
+    background-color: white;
+    z-index: 10000;
+    border-radius: 6px;
+  }
+
+  /*上传相片*/
+
+  .upload_photo {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 5px;
+    align-items: center;
+  }
+
+  .upload_photo div {
+    margin: 0 7px;
+  }
+
+  .upload_photo img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .upload_photo h1 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .upload_photo p {
     font-size: 12px;
-    line-height: 17px;
-    letter-spacing: 0px;
-    align-content: center;
   }
 
-  .list_box_details_operator img {
-    width: 25px;
-    height: 25px;
-    opacity: 1;
+  /*上传视频*/
+
+  .upload_video {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 5px;
+    align-items: center;
   }
 
-  /*  列表交互数据观看*/
-  .operator_look {
-    width: 50%;
+  .upload_video div {
+    margin: 0 7px;
+  }
+
+  .upload_video img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .upload_video h1 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .upload_video p {
+    font-size: 12px;
+  }
+
+  /*已经上传*/
+  .already_uoload {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 5px;
+    align-items: center;
+  }
+
+  .already_uoload div {
+    margin: 0 7px;
+  }
+
+  .already_uoload img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .already_uoload h1 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .already_uoload p {
+    font-size: 12px;
+  }
+
+  .cancel {
     display: flex;
     flex-direction: row;
     align-items: center;
-
+    justify-content: center;
+    background-color: #f0f0f0;
+    padding: 7px 0;
   }
 
-  /*列表交互数据喜欢*/
-  .operator_like {
-    width: 40%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  /*状态管理*/
+  .popDataN {
+    display: none;
+  }
+
+  .popDataY {
+    display: block;
   }
 </style>
