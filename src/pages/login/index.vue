@@ -51,7 +51,7 @@
               if (grant) {
                 // 如果已经授权过，则直接跳转到首页（这里应该添加一些参数）
                 let url = '../index/main'
-                wx.navigateTo({url})
+                wx.switchTab({url})
               }
             }
           })
@@ -107,7 +107,7 @@
                   local.set('token', token)
                   // 授权成功之后，跳转到首页
                   let url = '../index/main'
-                  wx.navigateTo({url})
+                  wx.switchTab({url})
                 } else {
                   console.log('授权失败')
                 }
