@@ -33,7 +33,7 @@ npm build:my
 npm run build --report
 
 
-不管当前在经历着什么，始终要认为自己前途无量；乾坤未定的时候，你我皆是黑马
+放生
 ```
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
